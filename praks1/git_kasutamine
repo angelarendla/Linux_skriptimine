@@ -1,3 +1,5 @@
+Põhikasutamine:
+
 * root kasutajana:
 installi - apt-get install git
 * tavakasutajana:
@@ -21,5 +23,5 @@ remote seadistamine:
 e) git remote add nimi github:aadress
 git remote add skriptimine git@github.com:kasutajanimi/reponimi.git
 
-f)git remote kontroll
+f) git remote kontroll
 git remote -v
