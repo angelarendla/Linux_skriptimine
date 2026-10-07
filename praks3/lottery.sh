@@ -1,43 +1,46 @@
 #!/bin/bash
 
-> player_numbers.txt
-> lottery_numbers.txt
+show_header() { echo "=== LOTO MÄNG ==="; }
+clear_files() { > player_numbers.txt; > lottery_numbers.txt; }
+read_player() { read -p "Nimi: " name; name="${name:-Unknown}"; }
 
-read -p "Sisesta nimi: " name
-if [ -z "$name" ]; then name="Unknown"; fi
+read_player_numbers() {
+    echo "Sisesta 5 numbrit (1-50):"
+    while [ $(wc -l < player_numbers.txt) -lt 5 ]; do
+        read -p "> " n
+        [[ "$n" =~ ^[1-9]$|^[1-4][0-9]$|^50$ ]] && ! grep -qx "$n" player_numbers.txt && echo "$n" >> player_numbers.txt || echo "Viga!"
+    done
+}
 
-echo "Sisesta 5 numbrit (1-50):"
-count=0
-while [ $count -lt 5 ]; do
-    read -p "Number $((count + 1)): " num
-    if ! [[ "$num" =~ ^[0-9]+$ ]] || [ $num -lt 1 ] || [ $num -gt 50 ]; then
-        echo "Viga! Sisesta arv 1-50."
-    elif grep -q "^${num}$" player_numbers.txt; then
-        echo "Seda juba valisid!"
-    else
-        echo "$num" >> player_numbers.txt
-        count=$((count + 1))
-    fi
-done
+show_player_numbers() { echo "Sinu numbrid:"; cat player_numbers.txt; }
 
-while [ $(wc -l < lottery_numbers.txt) -lt 5 ]; do
-    r=$(( (RANDOM % 50) + 1 ))
-    grep -q "^${r}$" lottery_numbers.txt || echo "$r" >> lottery_numbers.txt
-done
+generate_lottery_numbers() {
+    while [ $(wc -l < lottery_numbers.txt) -lt 5 ]; do
+        r=$((RANDOM % 50 + 1))
+        grep -qx "$r" lottery_numbers.txt || echo "$r" >> lottery_numbers.txt
+    done
+}
 
-matches=0
-while read -r p; do
-    echo "Kontrollin $p..."
-    if grep -q "^${p}$" lottery_numbers.txt; then
-        echo "TABAMUS!"
-        matches=$((matches + 1))
-    else
-        echo "Ei tabanud."
-    fi
-done < player_numbers.txt
+show_lottery_numbers() { echo -e "\nVõidunumbrid:"; cat lottery_numbers.txt; }
 
-if [ $matches -eq 5 ]; then res="JACKPOT!"; elif [ $matches -eq 4 ]; then res="Väga hea tulemus!"; elif [ $matches -eq 3 ]; then res="Hea tulemus."; elif [ $matches -eq 2 ]; then res="Kaks tabamust."; elif [ $matches -eq 1 ]; then res="Üks tabamus."; else res="Seekord tabamusi ei olnud."; fi
+check_matches() {
+    matches=0
+    for p in $(cat player_numbers.txt); do
+        grep -qx "$p" lottery_numbers.txt && { echo "$p: TABAMUS!"; matches=$((matches+1)); } || echo "$p: Ei"
+    done
+}
 
-echo "Mängija: $name | Tabamusi: $matches/5 | $res"
+show_result() { echo -e "\nTabamusi: $matches/5"; }
+save_result() { echo "$(date) | $name | Tabamusi: $matches" >> results.txt; }
 
-{ echo "========================================"; echo "Date: $(date)"; echo "Player: $name"; echo "Player numbers:"; cat player_numbers.txt; echo "Lottery numbers:"; cat lottery_numbers.txt; echo "Matches: $matches"; echo "Result: $res"; } >> results.txt
+# --- PÕHIOSA ---
+show_header
+clear_files
+read_player
+read_player_numbers
+show_player_numbers
+generate_lottery_numbers
+show_lottery_numbers
+check_matches
+show_result
+save_result
