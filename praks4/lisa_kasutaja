@@ -1,0 +1,17 @@
+#!/bin/bash
+
+kasutaja=$1
+
+if [ -z "$kasutaja" ]; then
+    echo "Kasutus: $0 kasutajanimi"
+    exit 1
+fi
+
+useradd -m -s /bin/bash "$kasutaja"
+
+if [ $? -eq 0 ]; then
+    echo "Kasutaja $kasutaja on loodud."
+    cat /etc/passwd | grep "$kasutaja"
+else
+    echo "Kasutaja loomine ebaõnnestus!"
+fi
