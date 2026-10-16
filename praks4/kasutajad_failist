@@ -1,0 +1,14 @@
+#!/bin/bash
+
+fail=$1
+
+if [ ! -f "$fail" ]; then
+    echo "Faili ei leitud!"
+    exit 1
+fi
+
+while read -r kasutaja; do
+    if [ -n "$kasutaja" ]; then
+        ./lisa_kasutaja "$kasutaja"
+    fi
+done < "$fail"
