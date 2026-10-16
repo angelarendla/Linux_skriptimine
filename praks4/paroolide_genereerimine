@@ -1,0 +1,21 @@
+#!/bin/bash
+
+fail=$1
+log_fail="loodud_kasutajad_paroolidega"
+
+if [ ! -f "$fail" ]; then
+    echo "Faili ei leitud!"
+    exit 1
+fi
+
+> "$log_fail"
+
+while read -r kasutaja; do
+    if [ -n "$kasutaja" ]; then
+        parool=$(pwgen -s 8 1)
+        useradd -m -s /bin/bash "$kasutaja"
+        echo "$kasutaja:$parool" | chpasswd
+        echo "$kasutaja:$parool" >> "$log_fail"
+        echo "Kasutaja $kasutaja loodud parooliga $parool"
+    fi
+done < "$fail"
