@@ -1,0 +1,15 @@
+#!/bin/bash
+
+fail=$1
+
+if [ ! -f "$fail" ]; then
+    echo "Faili ei leitud!"
+    exit 1
+fi
+
+while IFS=":" read -r kasutaja parool; do
+    if [ -n "$kasutaja" ]; then
+        ./lisa_kasutaja "$kasutaja"
+        echo "$kasutaja:$parool" | chpasswd
+    fi
+done < "$fail"
