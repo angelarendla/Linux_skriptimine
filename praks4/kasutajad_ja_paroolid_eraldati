@@ -1,0 +1,17 @@
+#!/bin/bash
+
+u_fail=$1
+p_fail=$2
+
+if [ ! -f "$u_fail" ] || [ ! -f "$p_fail" ]; then
+    echo "Kasutus: $0 kasutajate_fail paroolide_fail"
+    exit 1
+fi
+
+paste "$u_fail" "$p_fail" | while read -r kasutaja parool; do
+    if [ -n "$kasutaja" ] && [ -n "$parool" ]; then
+        useradd -m -s /bin/bash "$kasutaja"
+        echo "$kasutaja:$parool" | chpasswd
+        echo "Kasutaja $kasutaja lisatud parooliga."
+    fi
+done
