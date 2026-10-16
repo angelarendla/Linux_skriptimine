@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ "$(whoami)" != "root" ] || [ -n "$SUDO_USER" ]; then
+    echo "Viga: Seda skripti tohib käivitada AINULT otsene root kasutaja (sudo pole lubatud)!"
+    exit 1
+fi
+
+fail=$1
+log_fail="loodud_kasutajad_paroolidega"
+
+if [ ! -f "$fail" ]; then
+    echo "Kasutus: $0 kasutajate_fail"
+    exit 1
+fi
+
+> "$log_fail"
+
+while read -r kasutaja; do
+    if [ -n "$kasutaja" ]; then
+        parool=$(pwgen -s 8 1)
+        useradd -m -s /bin/bash "$kasutaja"
+        echo "$kasutaja:$parool" | chpasswd
+        echo "$kasutaja:$parool" >> "$log_fail"
+        echo "Kasutaja $kasutaja loodud."
+    fi
+done < "$fail"
